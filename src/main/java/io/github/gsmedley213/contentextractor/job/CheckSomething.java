@@ -15,6 +15,6 @@ public class CheckSomething implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        developService.interogateBooks();
+        developService.interrogateBooks();
     }
 }
