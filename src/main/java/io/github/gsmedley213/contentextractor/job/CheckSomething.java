@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import static io.github.gsmedley213.contentextractor.service.DevelopService.Book;
+
 @Slf4j
 @Component
 public class CheckSomething implements CommandLineRunner {
@@ -15,6 +17,6 @@ public class CheckSomething implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        developService.interrogateBooks();
+        developService.modifyBook(Book.LIVESTOCK_AND_ARMOUR);
     }
 }
