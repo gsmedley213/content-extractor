@@ -17,6 +17,6 @@ public class CheckSomething implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        developService.modifyBook(Book.LIVESTOCK_AND_ARMOUR);
+        developService.runExtraction(Book.LIVESTOCK_AND_ARMOUR);
     }
 }

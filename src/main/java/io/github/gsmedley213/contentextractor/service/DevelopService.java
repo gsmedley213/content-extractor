@@ -2,10 +2,7 @@ package io.github.gsmedley213.contentextractor.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.github.gsmedley213.contentextractor.toucher.Elements;
-import io.github.gsmedley213.contentextractor.toucher.LimitByStartEnd;
-import io.github.gsmedley213.contentextractor.toucher.NodeToucher;
-import io.github.gsmedley213.contentextractor.toucher.Unused;
+import io.github.gsmedley213.contentextractor.toucher.*;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +10,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,11 +21,15 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.github.gsmedley213.contentextractor.strategy.ContentExtractor.walkTree;
+
 public interface DevelopService {
 
     void interrogateBooks();
 
     void modifyBook(Book book);
+
+    void runExtraction(Book book);
 
     @Slf4j
     @Service
@@ -38,42 +38,16 @@ public interface DevelopService {
         @Autowired
         ObjectMapper mapper;
 
+        @Autowired
+        ExtractorService extractorService;
+
         @Override
         @SneakyThrows
         public void interrogateBooks() {
             for (Book book : Book.values()) {
                 Document doc = readBook(book);
-                log.info("Title: {}", doc.title());
 
-                var limit = new LimitByStartEnd();
-                var elements = new Elements();
-                var textNodes = new TextNodes();
-                var unused = new Unused();
-                var users = Arrays.asList(limit, elements, textNodes, unused);
-                walkTree(doc, users);
-
-                var consideredElements = Set.of("p", "div");
-
-                List<Element> nested = elements.getElements().stream()
-                        .filter(e -> consideredElements.contains(e.tagName()))
-                        .filter(e -> hasChildWithTag(e, consideredElements))
-                        .toList();
-
-                List<Element> limited = elements.getElements().stream()
-                        .filter(e -> consideredElements.contains(e.tagName()))
-                        .filter(e -> !hasChildWithTag(e, consideredElements))
-                        .toList();
-
-                TextNodes limitedText = new TextNodes();
-                limited.forEach(e -> walkTree(e, List.of(limitedText)));
-
-                Set<TextNode> limitedNodes = new HashSet<>(limitedText.textNodes);
-                List<TextNode> missedNodes =
-                        textNodes.textNodes.stream().filter(tn -> !limitedNodes.contains(tn)).toList();
-
-                if (!nested.isEmpty()) {
-                    log.info("Nested div and p elements exits in {}", book);
-                }
+                // TODO Code for answering questions about books
             }
         }
 
@@ -108,24 +82,9 @@ public interface DevelopService {
                     d2.outerHtml(), StandardCharsets.UTF_8);
         }
 
-        private static boolean hasChildWithTag(Element element, Set<String> tags) {
-            return element.getAllElements().stream()
-                    .filter(e -> e != element)
-                    .anyMatch(e -> tags.contains(e.tagName()));
-        }
-
-        @Getter
-        private static class TextNodes implements NodeToucher {
-            List<TextNode> textNodes = new ArrayList<>();
-
-            @Override
-            public boolean touch(Node n) {
-                if (n instanceof TextNode tn) {
-                    textNodes.add(tn);
-                    return true;
-                }
-                return false;
-            }
+        @Override
+        public void runExtraction(Book book) {
+            extractorService.extractAndMark(readBook(book));
         }
 
         private void writeElementsByTag(Book book, Elements elements) throws IOException {
@@ -137,17 +96,6 @@ public interface DevelopService {
 
             Files.writeString(Paths.get("local", "books", book.getDirectory(), "elementsByTag.json"),
                     mapper.writeValueAsString(stringRepByTag));
-        }
-
-        private void walkTree(Node node, List<NodeToucher> users) {
-            for (NodeToucher check : users) {
-                if (check.touch(node)) {
-                    break;
-                }
-            }
-            for (Node child : node.childNodes()) {
-                walkTree(child, users);
-            }
         }
 
         @SneakyThrows
