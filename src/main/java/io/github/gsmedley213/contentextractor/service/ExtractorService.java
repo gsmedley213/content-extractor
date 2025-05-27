@@ -1,23 +1,29 @@
 package io.github.gsmedley213.contentextractor.service;
 
-import io.github.gsmedley213.contentextractor.model.AnnotationJob;
 import io.github.gsmedley213.contentextractor.model.ContentNodes;
+import io.github.gsmedley213.contentextractor.model.Notable;
 import io.github.gsmedley213.contentextractor.strategy.BottomDivP;
 import io.github.gsmedley213.contentextractor.strategy.ContentExtractor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public interface ExtractorService {
 
-    AnnotationJob extractAndMark(Document doc);
+    /**
+     * Takes an HTML document and tries to extract the text with content we would care to annotate. Adds attributes to
+     * all elements we extracted content from to allow us to associate that content later.
+     * @param doc Document to extract content from and mark. WARNING: This modifies the passed document to mark places
+     *            text content was extracted from.
+     * @return List of Notable object containing extracted text and id to reference element extracted from.
+     */
+    List<Notable> extractAndMark(Document doc);
 
     @Slf4j
     @Service
@@ -32,14 +38,33 @@ public interface ExtractorService {
         );
 
         @Override
-        public AnnotationJob extractAndMark(Document doc) {
+        public List<Notable> extractAndMark(Document doc) {
             log.info("Extracting contents for: {} using \"{}\" strategy", doc.title(), extractor.strategyDescription());
 
             ContentNodes content = extractor.extract(doc);
 
             checks.forEach(check -> check.accept(content)); // Run all checks on the result.
 
-            return null;
+            List<Notable> result = new ArrayList<>();
+            int elementId = 0;
+            for (Element element : content.contents()) {
+                Optional<String> cleanedText = clean(element);
+                if (cleanedText.isPresent()) {
+                    elementId++;
+                    element.attr("annotation-id", String.valueOf(elementId));
+                    result.add(new Notable(elementId, cleanedText.get()));
+                }
+            }
+
+            return result;
+        }
+
+        private Optional<String> clean(Element e) {
+            Element copy = e.clone();
+
+            copy.getElementsByClass("pagenum").forEach(Node::remove); // Remove pagenum spans
+
+            return copy.text().trim().isBlank() ? Optional.empty() : Optional.of(copy.text());
         }
 
         private void checkForLargeMissedText(ContentNodes nodes) {
