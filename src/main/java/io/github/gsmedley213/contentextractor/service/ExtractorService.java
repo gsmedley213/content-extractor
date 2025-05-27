@@ -27,7 +27,8 @@ public interface ExtractorService {
 
         List<Consumer<ContentNodes>> checks = Arrays.asList(
                 this::checkForDuplication,
-                this::checkForLargeMissedText
+                this::checkForLargeMissedText,
+                this::totalMissedText
         );
 
         @Override
@@ -37,12 +38,6 @@ public interface ExtractorService {
             ContentNodes content = extractor.extract(doc);
 
             checks.forEach(check -> check.accept(content)); // Run all checks on the result.
-
-            log.info("Extracted {} elements. This method missed total of {} characters of text.",
-                    content.contents().size(), content.missedText().stream()
-                            .map(tn -> tn.text().trim())
-                            .mapToInt(String::length)
-                            .sum());
 
             return null;
         }
@@ -66,6 +61,18 @@ public interface ExtractorService {
 
             duplicates.forEach(e -> log.warn("Warning: element with text \"{}\" is a child of another element",
                     e.text())); // TODO raise alert
+        }
+
+        private void totalMissedText(ContentNodes content) {
+            int totalMissedText = content.missedText().stream()
+                    .map(tn -> tn.text().trim())
+                    .mapToInt(String::length)
+                    .sum();
+
+            if (totalMissedText > 500) {
+                log.warn("Extracted {} elements. This method missed total of {} characters of text.",
+                        content.contents().size(), totalMissedText);
+            }
         }
     }
 }
