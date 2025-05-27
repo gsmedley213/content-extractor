@@ -7,9 +7,13 @@ import io.github.gsmedley213.contentextractor.strategy.ContentExtractor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface ExtractorService {
 
@@ -21,13 +25,18 @@ public interface ExtractorService {
 
         ContentExtractor extractor = new BottomDivP();
 
+        List<Consumer<ContentNodes>> checks = Arrays.asList(
+                this::checkForDuplication,
+                this::checkForLargeMissedText
+        );
+
         @Override
         public AnnotationJob extractAndMark(Document doc) {
             log.info("Extracting contents for: {} using \"{}\" strategy", doc.title(), extractor.strategyDescription());
 
             ContentNodes content = extractor.extract(doc);
 
-            checkForDuplication(content.contents());
+            checks.forEach(check -> check.accept(content)); // Run all checks on the result.
 
             log.info("Extracted {} elements. This method missed total of {} characters of text.",
                     content.contents().size(), content.missedText().stream()
@@ -38,8 +47,25 @@ public interface ExtractorService {
             return null;
         }
 
-        private void checkForDuplication(List<Element> contents) {
+        private void checkForLargeMissedText(ContentNodes nodes) {
+            List<TextNode> largeNode = nodes.missedText().stream().filter(tn -> tn.text().length() > 100).toList();
 
+            largeNode.forEach(tn -> log.warn("Extraction strategy excluded text of length {}: {}", tn.text().length(),
+                    tn.text())); // TODO raise alert
+        }
+
+        private void checkForDuplication(ContentNodes nodes) {
+            var contentSet = new HashSet<>(nodes.contents());
+            List<Element> childElements = nodes.contents().stream()
+                    .flatMap(e -> e.getAllElements().stream().filter(child -> child != e))
+                    .toList();
+
+            List<Element> duplicates = childElements.stream()
+                    .filter(contentSet::contains)
+                    .toList();
+
+            duplicates.forEach(e -> log.warn("Warning: element with text \"{}\" is a child of another element",
+                    e.text())); // TODO raise alert
         }
     }
 }
