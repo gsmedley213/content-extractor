@@ -112,7 +112,7 @@ public interface DevelopService {
                         .toList();
                 int maxRun = 0;
                 for (String filename : filenames) {
-                    if (filename.contains("-marked-")) {
+                    if (filename.contains("-marked")) {
                         // Expecting format [Project Gutenberg prefix]-[run number]-marked.html
                         int fileRun = Integer.parseInt(filename.split("-")[1]);
                         if (fileRun > maxRun) {
