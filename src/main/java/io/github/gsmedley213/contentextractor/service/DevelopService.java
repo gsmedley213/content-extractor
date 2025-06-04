@@ -50,7 +50,8 @@ public interface DevelopService {
             for (Book book : Book.values()) {
                 Document doc = readBook(book);
 
-                // TODO Code for answering questions about books
+                // Used this method when running checks on structure of some example HTML docs from Project Gutenberg.
+                // Leaving the unused empty method for now in case I need to do further checks later.
             }
         }
 
@@ -107,7 +108,7 @@ public interface DevelopService {
 
         private int findRun(Path path) {
             if (path.toFile().isDirectory()) {
-                List<String> filenames = Arrays.stream(path.toFile().listFiles())
+                List<String> filenames = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
                         .map(File::getName)
                         .toList();
                 int maxRun = 0;
