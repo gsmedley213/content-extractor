@@ -2,7 +2,7 @@
 
 **Part of the [Gutenberg Annotation Pipeline](#project-context).**
 
-`content-extractor` is a Java service that extracts content from Project Gutenberg HTML files and creates new HTML files where each extracted element is marked to allow it to be associated with its content later.
+`content-extractor` is a Java service that extracts content from Project Gutenberg HTML files and creates new HTML files where each extracted element is marked so it can be associated with its content later.
 
 ---
 
@@ -11,7 +11,7 @@
 This repository is one stage of a multi-step process for creating annotated versions of public domain books:
 
 1. **content-extractor**  
-   Extracts content from Project Gutenberg HTML and saves a new HTML file with elements marked to associated them with extracted content.
+   Extracts content from Project Gutenberg HTML and saves a new HTML file with elements marked to associate them with extracted content.
 
 2. **llm-annotate**  
    Consumes extracted content and uses a language model to generate notes for it, saving results as a notes JSON file.
@@ -50,7 +50,7 @@ Before running, the user should:
 - Extract the contents of the zip from Project Gutenberg to this directory.
 - The directory should now have a file that starts with `pg#` and ends with `-images.html`.
 - Either copy part of the description from the Project Gutenberg page, or read the book and write your own.
-- Add an entry under `files:books` in your application.yml with `directory` being the directory you created, `prefix` being the prefix you found early, and `description` being your description.
+- Add an entry under `file:books` in your application.yml with `directory` being the directory you created, `prefix` being the prefix you found early, and `description` being your description.
 
 ```yaml
 file:
@@ -65,7 +65,7 @@ file:
 ### 3. Running
 
 ```sh
-./gradlew bootRun --args='directory:livestock_and_armour run:1'
+./gradlew bootRun --args='--directory=livestock_and_armour --run=1'
 ```
 - `--directory`: Subdirectory for the book (matches `directory` in config).
 - `--run`: (Optional) Run number for organizing outputs.
