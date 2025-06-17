@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: content-extractor
+
+file:
+  shared: ../shared/books
+  books:
+    - directory: livestock_and_armour
+      prefix: pg51244
+      description: >
+        "The Livestock Producer and Armour" by Armour and Company is a scientific publication written in the early 20th century. This book discusses the dynamics of the livestock industry, the evolution of meat packing, and the economic relations between producers and packers, reflecting a time when the industry was adjusting to modern practices and market demands post-World War I.
+    - directory: napoleon_1
+      prefix: pg48837
+      description: >
+        "Life of Napoleon Bonaparte, Volume I" by Sir Walter Scott is a historical account written in the early 19th century. The narrative provides an in-depth examination of Napoleon's life amidst the backdrop of the French Revolution and the significant political upheavals of the time.
