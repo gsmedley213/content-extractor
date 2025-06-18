@@ -16,8 +16,7 @@ import java.util.function.Consumer;
 
 @Slf4j
 @Service
-public
-class ExtractorServiceImpl implements ExtractorService {
+public class ExtractorServiceImpl implements ExtractorService {
 
     final ContentExtractor extractor;
 

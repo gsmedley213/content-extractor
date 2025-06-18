@@ -26,8 +26,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public
-class DevelopServiceImpl implements DevelopService {
+public class DevelopServiceImpl implements DevelopService {
 
     private final ObjectMapper mapper;
     private final ExtractorService extractorService;
