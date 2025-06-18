@@ -95,6 +95,12 @@ This project is part of the **Gutenberg Annotation Pipeline**:
 
 ---
 
+## Future Plans
+
+- Add checks for unusual results during HTML parsing and raise alerts.
+- Investigate if more complex extraction strategies could capture more content.
+- Investigate if additional metadata could be gathered to help with context for the next step.
+
 ## Development
 
 - Java 21
