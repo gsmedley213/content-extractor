@@ -3,7 +3,6 @@ package io.github.gsmedley213.contentextractor.service.impl;
 import io.github.gsmedley213.contentextractor.model.ContentNodes;
 import io.github.gsmedley213.contentextractor.model.Notable;
 import io.github.gsmedley213.contentextractor.service.ExtractorService;
-import io.github.gsmedley213.contentextractor.strategy.BottomDivP;
 import io.github.gsmedley213.contentextractor.strategy.ContentExtractor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
@@ -20,13 +19,17 @@ import java.util.function.Consumer;
 public
 class ExtractorServiceImpl implements ExtractorService {
 
-    ContentExtractor extractor = new BottomDivP();
+    final ContentExtractor extractor;
 
     List<Consumer<ContentNodes>> checks = Arrays.asList(
             this::checkForDuplication,
             this::checkForLargeMissedText,
             this::totalMissedText
     );
+
+    public ExtractorServiceImpl(ContentExtractor extractor) {
+        this.extractor = extractor;
+    }
 
     @Override
     public List<Notable> extractAndMark(Document doc) {

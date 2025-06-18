@@ -65,8 +65,9 @@ file:
 ### 3. Running
 
 ```sh
-./gradlew bootRun --args='--directory=livestock_and_armour --run=1'
+./gradlew bootRun --args='--runLocal --directory=livestock_and_armour --run=1'
 ```
+- `--runLocal`: Run in local development mode.
 - `--directory`: Subdirectory for the book (matches `directory` in config).
 - `--run`: (Optional) Run number for organizing outputs.
 
